@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0-rc1-final-*",
+  "description": "ASP.NET 5 logging framework provider that enables an application to send log messages to a syslog server.",
+  "authors": [ "mguinness" ],
+  "tags": [ "syslog dnx" ],
+  "projectUrl": "https://github.com/mguinness/syslog-framework-logging",
+  "licenseUrl": "https://github.com/mguinness/syslog-framework-logging/blob/master/LICENSE",
+  "frameworks": {
+    "dnx451": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Net.Sockets": "4.0.10-beta-23109",
+        "System.Net.Primitives": "4.0.10-beta-23109",
+        "System.Text.Encoding": "4.0.10-beta-23109"
+      }
+    }
+  },
+  "dependencies": {
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final"
+  }
+}
