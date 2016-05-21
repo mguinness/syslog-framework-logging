@@ -9,10 +9,11 @@ namespace Syslog.Framework.Logging
 {
     public static class SyslogLoggerFactoryExtensions
     {
-        public static void AddSyslog(this ILoggerFactory loggerFactory, IConfiguration configuration, string hostName = "localhost", LogLevel logLevel = LogLevel.Verbose)
+        public static void AddSyslog(this ILoggerFactory loggerFactory, IConfigurationSection configuration, string hostName = "localhost", LogLevel logLevel = LogLevel.Debug)
         {
-            var settings = configuration.Get<SyslogLoggerSettings>();
-            loggerFactory.AddProvider(new SyslogLoggerProvider(settings.ServerHost, settings.ServerPort, hostName, logLevel));
+            var settings = new SyslogLoggerSettings();
+            configuration.Bind(settings);
+            loggerFactory.AddProvider(new SyslogLoggerProvider(settings, hostName, logLevel));
         }
     }
 }

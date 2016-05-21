@@ -10,7 +10,7 @@ namespace Syslog.Framework.Logging
         private readonly string _name;
         private readonly string _host;
         private readonly LogLevel _lvl;
-        private readonly UdpClient _udp;
+        private readonly SyslogLoggerSettings _settings;
 
         enum FacilityType
         {
@@ -20,15 +20,15 @@ namespace Syslog.Framework.Logging
 
         enum SeverityType { Emergency, Alert, Critical, Error, Warning, Notice, Informational, Debug };
 
-        public SyslogLogger(string name, UdpClient udp, string host, LogLevel lvl)
+        public SyslogLogger(string name, SyslogLoggerSettings settings, string host, LogLevel lvl)
         {
             _name = name;
-            _udp = udp;
+            _settings = settings;
             _host = host;
             _lvl = lvl;
         }
 
-        public IDisposable BeginScopeImpl(object state)
+        public IDisposable BeginScope<TState>(TState state)
         {
             return null;
         }
@@ -38,7 +38,7 @@ namespace Syslog.Framework.Logging
             return logLevel != LogLevel.None && logLevel >= _lvl;
         }
 
-        public void Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             SeverityType severity = SeverityType.Debug;
 
@@ -63,20 +63,31 @@ namespace Syslog.Framework.Logging
             else
                 return;
 
-            string message;
-
             if (formatter == null)
-                message = LogFormatter.Formatter(state, exception);
-            else
-                message = formatter(state, exception);
+                throw new ArgumentNullException(nameof(formatter));
+
+            string message = formatter(state, exception);
 
             if (!String.IsNullOrEmpty(message))
             {
                 int priority = ((int)FacilityType.Local0 * 8) + (int)severity; // (Facility * 8) + Severity = Priority
                 string msg = String.Format("<{0}>{1:MMM dd HH:mm:ss} {2} {3}", priority, DateTime.Now, _host, _name + ": " + message); // RFC 3164 header format
 
+                UdpClient udp = new UdpClient();
                 byte[] raw = Encoding.ASCII.GetBytes(msg);
-                _udp.SendAsync(raw, Math.Min(raw.Length, 1024));
+
+                try
+                {
+                    udp.SendAsync(raw, Math.Min(raw.Length, 1024), _settings.ServerHost, _settings.ServerPort);
+                }
+                finally
+                {
+#if NET452
+                    udp.Close();
+#else
+                    udp.Dispose();
+#endif
+                }
             }
         }
     }
