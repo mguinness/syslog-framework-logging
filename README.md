@@ -27,7 +27,7 @@ public class Startup
     {
       var slConfig = Configuration.GetSection("SyslogSettings");
       if (slConfig != null)
-        loggerFactory.AddSyslog(slConfig, Configuration.Get<string>("COMPUTERNAME", "localhost"));
+        loggerFactory.AddSyslog(slConfig, Configuration.GetValue<string>("COMPUTERNAME", "localhost"));
     }
   }
 }  
