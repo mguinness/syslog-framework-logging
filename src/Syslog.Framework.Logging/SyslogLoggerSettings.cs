@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Syslog.Framework.Logging
+﻿namespace Syslog.Framework.Logging
 {
     public class SyslogLoggerSettings
     {

@@ -1,5 +1,5 @@
 # Syslog.Framework.Logging
-Syslog provider for [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging), the logging subsystem used by ASP.NET 5.
+Syslog provider for [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging), the logging subsystem used by ASP.NET Core.
 
 This package routes ASP.NET log messages through Syslog, so you can capture these in any Syslog server like [Syslog Server](https://github.com/mguinness/syslogserver).
 

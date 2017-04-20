@@ -1,16 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ACCDBEFD-9D63-4C4B-9363-705B2834882D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6DD96F06-F9AF-4D60-AA20-8216E73453F4}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Syslog.Framework.Logging", "src\Syslog.Framework.Logging\Syslog.Framework.Logging.xproj", "{DBDE7B36-D863-4639-AAEE-086BF4AC0B30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Syslog.Framework.Logging", "src\Syslog.Framework.Logging\Syslog.Framework.Logging.csproj", "{DBDE7B36-D863-4639-AAEE-086BF4AC0B30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
