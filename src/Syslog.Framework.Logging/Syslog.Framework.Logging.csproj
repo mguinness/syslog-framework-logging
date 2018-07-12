@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>ASP.NET Core logging framework provider that enables an application to send log messages to a syslog server.</Description>
-    <Authors>mguinness</Authors>
+    <Authors>mguinness, bbrewder</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Syslog.Framework.Logging</AssemblyName>
     <PackageId>Syslog.Framework.Logging</PackageId>
@@ -16,12 +16,12 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
+    <Version>2.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
   </ItemGroup>  
 
 </Project>
