@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Syslog.Framework.Logging
 		private readonly string _host;
 		private readonly LogLevel _lvl;
 		private readonly SyslogLoggerSettings _settings;
+		private readonly int? _processId;
 
 		public SyslogLogger(string name, SyslogLoggerSettings settings, string host, LogLevel lvl)
 		{
@@ -20,6 +22,7 @@ namespace Syslog.Framework.Logging
 			_settings = settings;
 			_host = host;
 			_lvl = lvl;
+			_processId = GetProcID();
 		}
 
 		public IDisposable BeginScope<TState>(TState state)
@@ -49,9 +52,8 @@ namespace Syslog.Framework.Logging
 			// If a different value is needed, then this code should probably move into the specific loggers.
 			var severity = MapToSeverityType(logLevel);
 			var priority = ((int)_settings.FacilityType * 8) + (int)severity;
-			var procid = GetProcID();
 			var now = _settings.UseUtc ? DateTime.UtcNow : DateTime.Now;
-			var msg = FormatMessage(priority, now, _host, _name, procid, eventId.Id, message);
+			var msg = FormatMessage(priority, now, _host, _name, _processId, eventId.Id, message);
 			var raw = Encoding.ASCII.GetBytes(msg);
 
 			using (var udp = new UdpClient())
@@ -60,26 +62,30 @@ namespace Syslog.Framework.Logging
 			}
 		}
 
-		protected abstract string FormatMessage(int priority, DateTime now, string host, string name, int procid, int msgid, string message);
-
-		private int? _procID;
-		private int GetProcID()
+		[Obsolete("Left for backward compatibility only. Will be removed in future. Override the other method overload")]
+		protected virtual string FormatMessage(int priority, DateTime now, string host, string name, int procid, int msgid, string message)
 		{
-			if (_procID == null)
-			{
-				try
-				{
-					// Attempt to get the process ID. This might not work on all platforms.
-					_procID = Process.GetCurrentProcess().Id;
-				}
-				catch
-				{
-					// If we can't get it, just default to 0.
-					_procID = 0;
-				}
-			}
+			throw new NotImplementedException($"You have to provide implementation for a {nameof(FormatMessage)} method.");
+		}
 
-			return _procID.Value;
+		protected virtual string FormatMessage(int priority, DateTime now, string host, string name, int? procid, int msgid, string message)
+		{
+#pragma warning disable 618
+			return FormatMessage(priority, now, host, name, procid ?? 0, msgid, message);
+#pragma warning restore 618
+		}
+
+		private int? GetProcID()
+		{
+			try
+			{
+				// Attempt to get the process ID. This might not work on all platforms.
+				return Process.GetCurrentProcess().Id;
+			}
+			catch
+			{
+				return null;
+			}
 		}
 
 		internal virtual SeverityType MapToSeverityType(LogLevel logLevel)
@@ -110,7 +116,7 @@ namespace Syslog.Framework.Logging
 		{
 		}
 
-		protected override string FormatMessage(int priority, DateTime now, string host, string name, int procid, int msgid, string message)
+		protected override string FormatMessage(int priority, DateTime now, string host, string name, int? procid, int msgid, string message)
 		{
             var tag = name.Replace(".", String.Empty).Replace("_", String.Empty); // Alphanumeric
             tag = tag.Substring(0, Math.Min(32, tag.Length)); // Max length is 32 according to spec
@@ -123,6 +129,7 @@ namespace Syslog.Framework.Logging
 	/// </summary>
 	public class Syslog5424v1Logger : SyslogLogger
 	{
+		private const string NilValue = "-";
 		private readonly string _structuredData;
 
 		public Syslog5424v1Logger(string name, SyslogLoggerSettings settings, string host, LogLevel lvl)
@@ -136,11 +143,10 @@ namespace Syslog.Framework.Logging
 			if (settings.StructuredData == null)
                 return null;
 
-			if (settings.StructuredData.Count() == 0)
+			if (!settings.StructuredData.Any())
                 return null;
 			
 			var sb = new StringBuilder();
-			sb.Append(" "); // Need to add a space to separate what came before it.
 
 			foreach (var data in settings.StructuredData)
 			{
@@ -165,7 +171,7 @@ namespace Syslog.Framework.Logging
 					}
 				}
 
-                sb.Append("]");
+            sb.Append("]");
 			}
 
 			return sb.ToString();
@@ -194,10 +200,18 @@ namespace Syslog.Framework.Logging
 			return true;
 		}
 
-		protected override string FormatMessage(int priority, DateTime now, string host, string name, int procid, int msgid, string message)
+		protected override string FormatMessage(int priority, DateTime now, string host, string name, int? procid, int msgid, string message)
 		{
-            var data = _structuredData ?? String.Empty;
-            return $"<{priority}>1 {now:o} {host} {name} {procid} {msgid}{data} {message}";
+			var formattedTimestamp = FormatTimestamp(now);
+			return $"<{priority}>1 {formattedTimestamp} {host ?? NilValue} {name ?? NilValue} {procid?.ToString() ?? NilValue} {msgid} {_structuredData ?? NilValue} {message}";
+		}
+
+		/// <summary>
+		/// Formats the date as required by RFC 5424.
+		/// </summary>
+		private string FormatTimestamp(DateTime time)
+		{
+			return time.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK", CultureInfo.InvariantCulture);
 		}
 	}
 }

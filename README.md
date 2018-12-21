@@ -100,3 +100,11 @@ namespace MySyslogConsoleApp
   }
 }
 ```
+### Release notes
+#### 2.1.2
+Made changes to a RFC 5424 message sent by the library to fix some deviations from the RFC 5424 standard:
+* If any message header has no value a NILVALUE (-) is now written as the header value instead of just skipping the header. This fixes a bug where a part of message could be interpreted as structured data and the message malformed when it started with square braces followed by a colon and the message had no structured data assigned.
+* The timestamp is now written with 6 digits in a second fraction part as is mandated by the standard. Previously 7 digits have been written causing some syslog server implementations (such as rsyslog) to incorrectly display that part.
+* If we fail to retrieve the process id a NILVALUE is sent instead of 0.
+
+Aside from fixing the aforementioned bugs the changes should be transparent to any RFC 5424 compliant syslog server implementation.
