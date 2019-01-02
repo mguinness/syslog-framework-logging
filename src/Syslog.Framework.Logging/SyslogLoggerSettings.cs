@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Syslog.Framework.Logging.TransportProtocols;
 
 namespace Syslog.Framework.Logging
 {
@@ -7,15 +8,34 @@ namespace Syslog.Framework.Logging
 		#region Fields and Methods
 
 		/// <summary>
+		/// Gets or sets the protocol used to send messages to a Syslog server.
+		/// </summary>
+		public TransportProtocol MessageTransportProtocol { get; set; } = TransportProtocol.Udp;
+		
+		/// <summary>
 		/// Gets or sets the host for the Syslog server.
 		/// </summary>
+		/// <remarks>
+		/// Used only when <see cref="MessageTransportProtocol"/> is set to <see cref="TransportProtocol.Udp"/>.
+		/// </remarks>
 		public string ServerHost { get; set; } = "127.0.0.1";
 
 		/// <summary>
 		/// Gets or sets the port for the Syslog server.
 		/// </summary>
+		/// <remarks>
+		/// Used only when <see cref="MessageTransportProtocol"/> is set to <see cref="TransportProtocol.Udp"/>.
+		/// </remarks>
 		public int ServerPort { get; set; } = 514;
 
+		/// <summary>
+		/// Gets or sets the path to a Unix socket for logging.
+		/// </summary>
+		/// <remarks>
+		/// Used only when <see cref="MessageTransportProtocol"/> is set to <see cref="TransportProtocol.UnixSocket"/>.
+		/// </remarks>
+		public string UnixSocketPath { get; set; } = "/dev/log";
+		
 		/// <summary>
 		/// Gets or sets the facility type.
 		/// </summary>
@@ -35,6 +55,14 @@ namespace Syslog.Framework.Logging
 		/// Gets or sets whether to log messages using UTC or local time. Defaults to false (use local time).
 		/// </summary>
 		public bool UseUtc { get; set; } = false; // Default to false to be backwards compatible with v1.
+
+		/// <summary>
+		/// Gets or sets custom implementation of transport protocol.
+		/// </summary>
+		/// <remarks>
+		/// When it is set, <see cref="MessageTransportProtocol"/> is ignored.
+		/// </remarks>
+		public IMessageSender CustomMessageSender { get; set; } 
 
 		#endregion
 	}
